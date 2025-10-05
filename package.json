@@ -1,0 +1,38 @@
+{
+  "name": "qwtimers",
+  "version": "1.0.0",
+  "description": "QWTimers - Local timer management application with proxy server",
+  "main": "proxy.js",
+  "scripts": {
+    "start": "node proxy.js",
+    "dev": "nodemon proxy.js",
+    "lint": "eslint *.js",
+    "lint:fix": "eslint *.js --fix",
+    "serve": "npm start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "timers",
+    "qilowatt",
+    "proxy",
+    "express",
+    "energy"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "http-proxy-middleware": "^2.0.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "eslint": "^8.55.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tanelvakker/qwtimers.git"
+  }
+}
