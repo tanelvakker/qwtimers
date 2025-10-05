@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All Timers</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<style>
+body {
+    background-color: #f8f9fa;
+}
+
+.action-card {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    width: 180px;
+    padding: 0.6rem 1rem;
+    border-radius: 0.85rem;
+    background-color: #eef1f8;
+    color: #212529;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+    text-align: center;
+    margin: 0 auto;
+}
+
+.action-mode {
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.25;
+    word-break: break-word;
+}
+
+.action-metric {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.95rem;
+}
+
+.action-icon {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.period-label {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.price-card {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    width: 180px;
+    padding: 0.6rem 1rem;
+    border-radius: 0.85rem;
+    background-color: #eef2f9;
+    color: #212529;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    margin: 0 auto;
+}
+
+.price-line {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.95rem;
+}
+
+.price-icon {
+    font-size: 0.95rem;
+    line-height: 1;
+}
+
+.timer-row {
+    cursor: pointer;
+}
+
+.timer-row .row-checkbox {
+    cursor: pointer;
+}
+
+.action-cell {
+    cursor: pointer;
+}
+
+.table-wrapper {
+    width: 100%;
+    margin: 0 auto;
+}
+
+#timersTable {
+    width: auto;
+    margin: 0 auto;
+    table-layout: fixed;
+}
+
+#timersTable th,
+#timersTable td {
+    padding: 0.6rem 0.75rem;
+    vertical-align: middle;
+}
+
+#timersTable th:nth-child(2),
+#timersTable td:nth-child(2) {
+    width: 220px;
+}
+
+#timersTable th:nth-child(3),
+#timersTable td:nth-child(3) {
+    width: 200px;
+}
+
+#timersTable th:nth-child(4),
+#timersTable td:nth-child(4) {
+    width: 200px;
+}
+
+.selection-bar {
+    position: fixed;
+    bottom: 1.25rem;
+    left: 50%;
+    transform: translate(-50%, 1rem);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    max-width: 600px;
+    padding: 0.75rem 1.5rem;
+    border-radius: 999px;
+    background: rgba(248, 249, 250, 0.95);
+    box-shadow: 0 0.5rem 1rem rgba(31, 45, 61, 0.1);
+    backdrop-filter: blur(4px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    pointer-events: none;
+    width: min(90%, 600px);
+    z-index: 1040;
+}
+
+.selection-bar.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+    pointer-events: auto;
+}
+
+.selection-summary {
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.content-wrapper {
+    max-width: 860px;
+    margin: 0 auto;
+}
+</style>
+</head>
+<body>
+<div class="container mt-4">
+    <div class="content-wrapper">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h1 class="h3 mb-0">All Timers</h1>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-secondary" id="refreshBtn">Refresh</button>
+                <button type="button" class="btn btn-outline-danger d-none" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+
+        <div class="row g-2 align-items-center mb-3" id="deviceControls">
+            <div class="col-auto">
+                <label for="deviceSelect" class="col-form-label">Device</label>
+            </div>
+            <div class="col-sm-6 col-md-5 col-lg-4">
+                <select class="form-select" id="deviceSelect" disabled>
+                    <option selected>Sign in to load devices</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-outline-secondary" id="reloadDevicesBtn" disabled>Reload</button>
+            </div>
+        </div>
+
+        <div id="alertPlaceholder"></div>
+
+        <div class="table-responsive table-wrapper">
+            <table class="table table-striped align-middle" id="timersTable">
+                <thead>
+                    <tr>
+                        <th scope="col" class="text-center" style="width: 3rem;">
+                            <input type="checkbox" class="form-check-input" id="selectAll">
+                        </th>
+                        <th scope="col">Period</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="selection-bar" id="selectionBar" aria-hidden="true">
+    <div class="selection-summary" id="selectionSummary">0 selected</div>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-outline-secondary btn-sm" id="clearSelectionBtn">Clear</button>
+        <button type="button" class="btn btn-primary btn-sm" id="floatingEditBtn">Edit selected</button>
+    </div>
+</div>
+
+<div class="modal fade" id="loginModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" id="loginForm">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="loginModalLabel">Sign in</h1>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger d-none" id="loginError"></div>
+                <div class="mb-3">
+                    <label for="loginEmail" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="loginEmail" placeholder="you@example.com" required autocomplete="email">
+                </div>
+                <div class="mb-3">
+                    <label for="loginPassword" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="loginPassword" required autocomplete="current-password">
+                </div>
+                <input type="hidden" name="company" id="loginCompany" value="">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="1" id="loginRemember">
+                    <label class="form-check-label" for="loginRemember">
+                        Remember me on this device
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" id="loginSubmitBtn">Log in</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form class="modal-content" id="editForm">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="editModalLabel">Edit selected timers</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="workmodeMode" class="form-label">Work mode</label>
+                    <select class="form-select" id="workmodeMode" required></select>
+                </div>
+                <div class="mb-3">
+                    <label for="powerLimitInput" class="form-label">Power limit (W)</label>
+                    <input type="number" class="form-control" id="powerLimitInput" min="0" step="10" required>
+                </div>
+                <div class="mb-3">
+                    <label for="batterySocInput" class="form-label">Battery SOC (%)</label>
+                    <input type="number" class="form-control" id="batterySocInput" min="1" max="100" required>
+                </div>
+                <div class="small text-muted">
+                    The changes will be applied to <span id="selectedCount">0</span> timeslot<span id="selectedCountPlural">s</span>.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="editSubmitBtn">Save changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
